@@ -13,8 +13,8 @@ RUN pip install -r requirements.txt
 # Copiar os arquivos da API para o container
 COPY . .
 
-# Expor a porta 1313
-EXPOSE 1313
+# Expor a porta 10000
+EXPOSE 10000
 
 # Comando para rodar a aplicação
-CMD ["python", "app.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:10000", "app:app"]
