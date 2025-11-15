@@ -26,5 +26,41 @@ class APITestCase(unittest.TestCase):
         response = self.client.get('/protected')
         self.assertEqual(response.status_code, 401)
 
+
+    def test_items_returns_list(self):
+        """Verifica se /items retorna uma lista válida"""
+        response = self.client.get('/items')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("items", response.json)
+        self.assertIsInstance(response.json["items"], list)
+        self.assertGreater(len(response.json["items"]), 0)
+
+
+    def test_login_returns_valid_jwt(self):
+        """Verifica se o /login retorna um token JWT em string"""
+        response = self.client.post('/login')
+        self.assertEqual(response.status_code, 200)
+        token = response.json.get("access_token")
+        self.assertIsInstance(token, str)
+        self.assertGreater(len(token), 10)  # valida token minimamente
+
+
+    def test_protected_with_valid_token(self):
+        """Acessa /protected com um token válido"""
+        # Primeiro gera o token
+        login_response = self.client.post('/login')
+        token = login_response.json.get("access_token")
+
+        # Chama rota /protected usando o token
+        headers = {"Authorization": f"Bearer {token}"}
+        response = self.client.get('/protected', headers=headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.json)
+        self.assertEqual(response.json["message"], "Protected route")
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
